@@ -5,13 +5,13 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/user/Login.vue'),
+    component: () => import('@/views/system/user/Login.vue'),
     meta: { requiresAuth: false }
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('@/views/user/Register.vue'),
+    component: () => import('@/views/system/user/Register.vue'),
     meta: { requiresAuth: false }
   },
   {
@@ -25,13 +25,13 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('@/views/dashboard/Index.vue'),
-        meta: { title: '仪表盘', icon: 'Odometer' }
+        meta: { title: '仪表盘', icon: 'Odometer', requiresAuth: true }
       },
       {
         path: 'assets',
         name: 'Assets',
         component: () => import('@/views/asset/Index.vue'),
-        meta: { title: '资产管理', icon: 'Box' }
+        meta: { title: '资产管理', icon: 'Box', requiresAuth: true }
       },
       // {
       //   path: 'assets/create',
@@ -52,34 +52,53 @@ const routes = [
       //   meta: { title: '资产详情', hidden: true }
       // },
       {
+        path: 'categories',
+        name: 'Categories',
+        component: () => import('@/views/category/Index.vue'),
+        meta: { title: '分类管理', icon: 'Tags', requiresAuth: true }
+      },
+      {
+        path: 'suppliers',
+        name: 'Suppliers',
+        component: () => import('@/views/supplier/Index.vue'),
+        meta: { title: '供应商管理', icon: 'Truck', requiresAuth: true }
+      },
+
+      {
         path: 'users',
         name: 'Users',
-        component: () => import('@/views/user/Index.vue'),
-        meta: { title: '用户管理', icon: 'User' }
+        component: () => import('@/views/system/user/Index.vue'),
+        meta: { title: '用户管理', icon: 'User', requiresAuth: true }
       },
       {
         path: 'roles',
         name: 'Roles',
-        component: () => import('@/views/system/Role.vue'),
-        meta: { title: '角色管理', icon: 'Lock' }
+        component: () => import('@/views/system/role/Index.vue'),
+        meta: { title: '角色管理', icon: 'Lock', requiresAuth: true }
       },
       {
-        path: 'maintenance',
-        name: 'Maintenance',
-        component: () => import('@/views/asset/Maintenance.vue'),
-        meta: { title: '维修管理', icon: 'Tools' }
+        path: 'departments',
+        name: 'Departments',
+        component: () => import('@/views/system/department/Index.vue'),
+        meta: { title: '部门管理', icon: 'Organization', requiresAuth: true }
       },
-      {
-        path: 'approval',
-        name: 'Approval',
-        component: () => import('@/views/system/Approval.vue'),
-        meta: { title: '审批管理', icon: 'DocumentChecked' }
-      },
+      // {
+      //   path: 'maintenance',
+      //   name: 'Maintenance',
+      //   component: () => import('@/views/asset/Maintenance.vue'),
+      //   meta: { title: '维修管理', icon: 'Tools' }
+      // },
+      // {
+      //   path: 'approval',
+      //   name: 'Approval',
+      //   component: () => import('@/views/system/Approval.vue'),
+      //   meta: { title: '审批管理', icon: 'DocumentChecked' }
+      // },
       {
         path: 'profile',
         name: 'Profile',
-        component: () => import('@/views/user/Profile.vue'),
-        meta: { title: '个人中心', hidden: true }
+        component: () => import('@/views/system/user/Profile.vue'),
+        meta: { title: '个人中心', hidden: true, requiresAuth: true }
       }
     ]
   }

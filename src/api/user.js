@@ -1,6 +1,6 @@
 import service from './index'
 
-export function getUserList(params) {
+export function getUsers(params) {
   return service({
     url: '/users',
     method: 'get',
@@ -62,10 +62,79 @@ export function resetPassword(id, data) {
   })
 }
 
+export function register(data) {
+  return service({
+    url: '/auth/register',
+    method: 'post',
+    data
+  })
+}
+
+export function login(data) {
+  return service({
+    url: '/auth/login',
+    method: 'post',
+    data
+  })
+}
+
+export function logout() {
+  return service({
+    url: '/auth/logout',
+    method: 'post'
+  })
+}
+
+export function refreshToken(data) {
+  return service({
+    url: '/auth/refresh',
+    method: 'post',
+    data
+  })
+}
+
+export function getProfile() {
+  return service({
+    url: '/users/profile',
+    method: 'get'
+  })
+}
+
+export function updateProfile(data) {
+    return service({
+    url: '/users/profile',
+    method: 'put',
+    data
+  })
+}
+
 export function getRoles() {
   return service({
     url: '/roles',
     method: 'get'
+  })
+}
+
+export function createRole(data) {
+  return service({
+    url: '/roles',
+    method: 'post',
+    data
+  })
+}
+
+export function updateRole(id, data) {
+  return service({
+    url: `/roles/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteRole(id) {
+  return service({
+    url: `/roles/${id}`,
+    method: 'delete'
   })
 }
 

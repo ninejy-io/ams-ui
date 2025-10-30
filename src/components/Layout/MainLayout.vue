@@ -21,25 +21,45 @@
             <el-icon><Box /></el-icon>
             <span>资产管理</span>
           </template>
-          <el-menu-item index="/assets">资产列表</el-menu-item>
-          <el-menu-item index="/assets/create">新增资产</el-menu-item>
+          <el-menu-item index="/assets">
+            <el-icon><Memo /></el-icon>
+            <span>资产列表</span>
+          </el-menu-item>
+          <el-menu-item index="/maintenance">
+            <el-icon><Tools /></el-icon>
+            <span>维修管理</span>
+          </el-menu-item>
         </el-sub-menu>
+
+        <el-menu-item index="/categories">
+          <el-icon><List /></el-icon>
+          <span>分类管理</span>
+        </el-menu-item>
+
+        <el-menu-item index="/suppliers">
+          <el-icon><Grid /></el-icon>
+          <span>供应商管理</span>
+        </el-menu-item>
+
         <el-sub-menu index="system">
           <template #title>
             <el-icon><Setting /></el-icon>
             <span>系统管理</span>
           </template>
-          <el-menu-item index="/roles">角色管理</el-menu-item>
-          <el-menu-item index="/approval">审批管理</el-menu-item>
+          <el-menu-item index="/users">
+            <el-icon><User /></el-icon>
+            <span>用户管理</span>
+          </el-menu-item>
+          <el-menu-item index="/roles">
+            <el-icon><UserFilled /></el-icon>
+            <span>角色管理</span>
+          </el-menu-item>
+          <el-menu-item index="/departments">
+            <el-icon><Menu /></el-icon>
+            <span>部门管理</span>
+          </el-menu-item>
         </el-sub-menu>
-        <el-menu-item index="/maintenance">
-          <el-icon><Tools /></el-icon>
-          <span>维修管理</span>
-        </el-menu-item>
-        <el-menu-item index="/users">
-          <el-icon><User /></el-icon>
-          <span>用户管理</span>
-        </el-menu-item>
+
         <el-menu-item index="/approval">
           <el-icon><DocumentChecked /></el-icon>
           <span>审批管理</span>

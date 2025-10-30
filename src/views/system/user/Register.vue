@@ -104,6 +104,8 @@ import {
   Iphone, 
   Avatar 
 } from '@element-plus/icons-vue'
+import { register } from '@/api/user'
+import router from '@/router'
 
 const registerFormRef = ref(null)
 const loading = ref(false)
@@ -154,19 +156,18 @@ const handleRegister = () => {
         real_name: registerForm.real_name,
         phone: registerForm.phone
       }
-      
-      console.log('提交注册数据:', submitData)
-      
-      // 模拟API调用
-      setTimeout(() => {
-        loading.value = false
-        ElMessage.success('注册成功！')
-        
-        // 实际项目中这里应该是跳转到登录页或其他页面
-        console.log('注册成功，跳转到登录页面')
-      }, 1500)
-    } else {
-      ElMessage.error('请检查表单填写是否正确')
+
+      register(submitData).then((res) => {
+        if (res.code === 200) {
+          ElMessage.success(res.message)
+          router.push('/login')
+        } else {
+          ElMessage.error(res.message)
+        }
+      }).catch((err) => {
+        console.log(err)
+        ElMessage.error('请检查表单填写是否正确')
+      })
     }
   })
 }

@@ -272,7 +272,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { 
-  getUserList, 
+  getUsers, 
   createUser, 
   updateUser, 
   deleteUser, 
@@ -394,7 +394,7 @@ const formatDate = (date) => {
 const getList = async () => {
   listLoading.value = true
   try {
-    const response = await getUserList(listQuery)
+    const response = await getUsers(listQuery)
     list.value = response.data.items
     total.value = response.data.total
   } catch (error) {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { login, logout, refreshToken, getProfile } from '@/api/auth'
+import { login, logout, refreshToken, getProfile } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 export const useAuthStore = defineStore('auth', () => {

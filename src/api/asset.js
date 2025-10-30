@@ -102,3 +102,16 @@ export function generateQRCode(id) {
     method: 'post'
   })
 }
+
+// category
+
+
+// department
+export function getDepartments(params) {
+    return service({
+    url: '/departments',
+    method: 'get',
+    params
+  })
+}
+
