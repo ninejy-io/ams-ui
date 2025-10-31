@@ -41,6 +41,11 @@
           <span>供应商管理</span>
         </el-menu-item>
 
+        <el-menu-item index="/approval">
+          <el-icon><DocumentChecked /></el-icon>
+          <span>审批管理</span>
+        </el-menu-item>
+
         <el-sub-menu index="system">
           <template #title>
             <el-icon><Setting /></el-icon>
@@ -60,10 +65,6 @@
           </el-menu-item>
         </el-sub-menu>
 
-        <el-menu-item index="/approval">
-          <el-icon><DocumentChecked /></el-icon>
-          <span>审批管理</span>
-        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container>

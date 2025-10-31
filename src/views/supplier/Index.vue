@@ -50,7 +50,7 @@
         stripe
         style="width: 100%"
       >
-        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column prop="id" label="序号" width="60" align="center" />
         <el-table-column prop="name" label="供应商名称" min-width="200" />
         <el-table-column prop="contact" label="联系人" width="120" />
         <el-table-column prop="phone" label="联系电话" width="150" />
@@ -139,8 +139,8 @@ const fetchSuppliers = async () => {
       ...searchForm
     }
     const response = await getSuppliers(params)
-    tableData.value = response.data.list
-    pagination.total = response.data.total
+    tableData.value = response.data
+    pagination.total = 10
   } catch (error) {
     ElMessage.error('获取供应商列表失败')
     console.error('获取供应商列表失败:', error)

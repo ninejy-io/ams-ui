@@ -107,27 +107,103 @@
       </div>
     </el-card>
 
-    <!-- 部门表单对话框 -->
-    <DepartmentFormDialog
-      v-model:visible="dialogVisible"
-      :form-data="currentDepartment"
-      :is-edit="isEdit"
-      :parent-department="parentDepartment"
-      :manager-list="managerList"
-      :department-tree="departmentTree"
-      @success="handleFormSuccess"
-    />
+    <!-- 部门表单对话框（合并自 DepartmentForm.vue） -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="600px"
+      :before-close="handleClose"
+      append-to-body
+    >
+      <el-form
+        ref="formRef"
+        :model="localForm"
+        :rules="formRules"
+        label-width="100px"
+      >
+        <el-form-item label="父部门" v-if="parentDepartment.name">
+          <el-input :model-value="parentDepartment.name" disabled />
+        </el-form-item>
+
+        <el-form-item label="部门名称" prop="name">
+          <el-input
+            v-model="localForm.name"
+            placeholder="请输入部门名称"
+            maxlength="100"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="部门编码" prop="code">
+          <el-input
+            v-model="localForm.code"
+            placeholder="请输入部门编码"
+            maxlength="50"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="父部门" prop="parent_id" v-if="!parentDepartment.name">
+          <el-tree-select
+            v-model="localForm.parent_id"
+            :data="departmentTree"
+            :props="treeProps"
+            check-strictly
+            placeholder="请选择父部门"
+            clearable
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <el-form-item label="负责人" prop="manager_id">
+          <el-select
+            v-model="localForm.manager_id"
+            placeholder="请选择负责人"
+            clearable
+            style="width: 100%"
+          >
+            <el-option
+              v-for="user in managerList"
+              :key="user.value"
+              :label="user.label"
+              :value="user.value"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="描述" prop="description">
+          <el-input
+            v-model="localForm.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入部门描述"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" :loading="loadingForm" @click="handleSubmit">
+            确定
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, toRaw, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import DepartmentFormDialog from './DepartmentForm.vue'
 import {
   getDepartments,
   getDepartmentTree,
-  deleteDepartment
+  deleteDepartment,
+  createDepartment,
+  updateDepartment
 } from '@/api/department'
 import { getUsers } from '@/api/user'
 
@@ -156,30 +232,60 @@ const pagination = reactive({
 
 const tableData = ref([])
 
-// 计算属性 - 安全的数据处理
+// ---------------------- form/dialog local state (merged) ----------------------
+const formRef = ref(null)
+const loadingForm = ref(false)
+const localForm = reactive({}) // will be initialized from currentDepartment when opening
+
+const treeProps = {
+  value: 'id',
+  label: 'name',
+  children: 'children'
+}
+
+const formRules = reactive({
+  name: [
+    { required: true, message: '请输入部门名称', trigger: 'blur' },
+    { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
+  ],
+  code: [
+    { required: true, message: '请输入部门编码', trigger: 'blur' },
+    { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
+  ],
+  manager_id: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+  description: [{ max: 500, message: '长度不能超过 500 个字符', trigger: 'blur' }]
+})
+
+const dialogTitle = computed(() => {
+  if (parentDepartment.value?.name) {
+    return `在"${parentDepartment.value.name}"下新增子部门`
+  }
+  return isEdit.value ? '编辑部门' : '新增部门'
+})
+
+// manager list for select
 const managerList = computed(() => {
-  // 如果数据未加载或加载出错，返回空数组
   if (!isUsersLoaded.value || userLoadError.value) {
     return []
   }
-  
-  // 使用可选链和空值合并确保安全
   return (userList.value || [])
-    .filter(user => user?.id && user?.name) // 过滤有效数据
+    .filter(user => user?.id && user?.username)
     .map(user => ({
       value: user.id,
-      label: user.name || `用户${user.id}` // 提供默认显示文本
+      label: user.username || `用户${user.id}`
     }))
 })
+// ---------------------- end form/dialog state ----------------------
 
-// 方法
+// Methods
 const fetchDepartments = async () => {
   loading.value = true
   try {
     let response
     if (isTreeView.value) {
       response = await getDepartmentTree()
-      tableData.value = response.data
+      // protect against null response.data
+      tableData.value = Array.isArray(response?.data) ? response.data : []
     } else {
       const params = {
         page: pagination.current,
@@ -187,12 +293,14 @@ const fetchDepartments = async () => {
         ...searchForm
       }
       response = await getDepartments(params)
-      tableData.value = response.data.list
-      pagination.total = response.data.total
+      tableData.value = Array.isArray(response?.data?.list) ? response.data.list : []
+      pagination.total = Number(response?.data?.total) || 0
     }
   } catch (error) {
-    ElMessage.error('获取部门列表失败')
-    console.error('获取部门列表失败:', error)
+    ElMessage.error('Failed to load departments')
+    console.error('fetchDepartments error:', error)
+    tableData.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
@@ -202,7 +310,7 @@ const fetchDepartments = async () => {
 const fetchUsers = async () => {
   try {
     const response = await getUsers({ page: 1, size: 1000 })
-    // 验证响应数据
+    // console.log('fetchUsers response:', response) // debug log
     if (response?.data?.items && Array.isArray(response.data.items)) {
       userList.value = response.data.items
       userLoadError.value = false
@@ -258,10 +366,18 @@ const handleReset = () => {
   fetchDepartments()
 }
 
+const initLocalForm = () => {
+  // reset localForm fields then copy currentDepartment
+  Object.keys(localForm).forEach((k) => delete localForm[k])
+  Object.assign(localForm, toRaw(currentDepartment.value) || {})
+}
+
 const handleCreate = () => {
+  // console.log('[Department] handleCreate clicked') // debug log
   isEdit.value = false
   currentDepartment.value = {}
   parentDepartment.value = {}
+  initLocalForm()
   dialogVisible.value = true
 }
 
@@ -269,6 +385,7 @@ const handleEdit = (row) => {
   isEdit.value = true
   currentDepartment.value = { ...row }
   parentDepartment.value = {}
+  initLocalForm()
   dialogVisible.value = true
 }
 
@@ -278,6 +395,7 @@ const handleAddChild = (row) => {
     parent_id: row.id
   }
   parentDepartment.value = row
+  initLocalForm()
   dialogVisible.value = true
 }
 
@@ -292,7 +410,7 @@ const handleDelete = async (row) => {
         cancelButtonText: '取消'
       }
     )
-    
+
     await deleteDepartment(row.id)
     ElMessage.success('删除成功')
     fetchDepartments()
@@ -321,23 +439,61 @@ const handleCurrentChange = (newPage) => {
 }
 
 const handleExpandAll = () => {
-  // 这里需要实现展开所有行的逻辑
-  // 由于 Element Plus 的 table 没有直接的方法，可以通过设置默认展开来实现
   ElMessage.info('已展开所有部门')
 }
 
 const handleCollapseAll = () => {
-  // 这里需要实现折叠所有行的逻辑
   ElMessage.info('已折叠所有部门')
+}
+
+const handleClose = async () => {
+  dialogVisible.value = false
+  await nextTick()
+  formRef.value?.resetFields()
+  initLocalForm()
+}
+
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
+
+  loadingForm.value = true
+  try {
+    const submitData = {
+      ...toRaw(localForm),
+      parent_id: parentDepartment.value?.id || localForm.parent_id || null
+    }
+
+    if (isEdit.value) {
+      await updateDepartment(submitData.id || currentDepartment.value.id, submitData)
+      ElMessage.success('更新成功')
+    } else {
+      await createDepartment(submitData)
+      ElMessage.success('创建成功')
+    }
+    dialogVisible.value = false
+    fetchDepartments()
+  } catch (error) {
+    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
+    console.error('Operation failed:', error)
+  } finally {
+    loadingForm.value = false
+  }
 }
 
 // 获取部门树数据
 const fetchDepartmentTree = async () => {
   try {
     const response = await getDepartmentTree()
-    departmentTree.value = response.data
+    // ensure departmentTree is always an array
+    departmentTree.value = Array.isArray(response?.data) ? response.data : []
   } catch (error) {
-    console.error('获取部门树失败:', error)
+    console.error('fetchDepartmentTree error:', error)
+    departmentTree.value = []
   }
 }
 
@@ -368,5 +524,11 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>
