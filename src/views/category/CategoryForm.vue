@@ -1,13 +1,13 @@
 <template>
   <el-dialog
-    :visible="visible"
+    v-model="localVisible"
     :title="getDialogTitle()"
     width="600px"
     :before-close="handleClose"
   >
     <el-form
       ref="formRef"
-      :model="formData"
+      :model="localForm"
       :rules="formRules"
       label-width="100px"
     >
@@ -17,8 +17,8 @@
 
       <el-form-item label="分类名称" prop="name">
         <el-input
-          v-model="formData.name"
-          placeholder="请输入分类名称"
+          v-model="localForm.name"
+          placeholder="请输入父分类名称"
           maxlength="100"
           show-word-limit
         />
@@ -26,7 +26,7 @@
 
       <el-form-item label="父分类" prop="parent_id" v-if="!parentCategory.name">
         <el-tree-select
-          v-model="formData.parent_id"
+          v-model="localForm.parent_id"
           :data="categoryTree"
           :props="treeProps"
           check-strictly
@@ -38,7 +38,7 @@
 
       <el-form-item label="描述" prop="description">
         <el-input
-          v-model="formData.description"
+          v-model="localForm.description"
           type="textarea"
           :rows="4"
           placeholder="请输入分类描述"
@@ -60,89 +60,75 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, toRaw, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { createAssetCategory, updateAssetCategory } from '@/api/assetCategory'
 
 const props = defineProps({
-  visible: {
-    type: Boolean,
-    default: false
-  },
-  formData: {
-    type: Object,
-    default: () => ({})
-  },
-  isEdit: {
-    type: Boolean,
-    default: false
-  },
-  parentCategory: {
-    type: Object,
-    default: () => ({})
-  },
-  categoryTree: {
-    type: Array,
-    default: () => []
-  }
+  visible: { type: Boolean, default: false },
+  formData: { type: Object, default: () => ({}) },
+  isEdit: { type: Boolean, default: false },
+  parentCategory: { type: Object, default: () => ({}) },
+  categoryTree: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:visible', 'success'])
 
-// 响应式数据
-const loading = ref(false)
+// local visible so el-dialog v-model works and we can emit updates to parent
+const localVisible = ref(props.visible)
+watch(() => props.visible, (v) => (localVisible.value = v))
+watch(localVisible, (v) => emit('update:visible', v))
+
+// local form copy to avoid mutating prop directly
+const localForm = reactive({})
 const formRef = ref()
+const loading = ref(false)
 
-// 树形选择器配置
-const treeProps = {
-  value: 'id',
-  label: 'name',
-  children: 'children'
-}
+watch(
+  () => props.formData,
+  (newVal) => {
+    Object.keys(localForm).forEach((k) => delete localForm[k])
+    Object.assign(localForm, newVal || {})
+  },
+  { deep: true, immediate: true }
+)
 
-// 表单验证规则
+const treeProps = { value: 'id', label: 'name', children: 'children' }
+
 const formRules = reactive({
   name: [
     { required: true, message: '请输入分类名称', trigger: 'blur' },
     { min: 1, max: 100, message: '长度在 1 到 100 个字符', trigger: 'blur' }
   ],
-  description: [
-    { max: 500, message: '长度不能超过 500 个字符', trigger: 'blur' }
-  ]
+  description: [{ max: 500, message: '长度不能超过 500 个字符', trigger: 'blur' }]
 })
 
-// 计算属性
 const dialogTitle = computed(() => {
-  if (props.parentCategory.name) {
-    return `在"${props.parentCategory.name}"下新增子分类`
-  }
+  if (props.parentCategory.name) return `在 "${props.parentCategory.name}" 下新增子分类`
   return props.isEdit ? '编辑分类' : '新增分类'
 })
+const getDialogTitle = () => dialogTitle.value
 
-// 方法
-const getDialogTitle = () => {
-  return dialogTitle.value
-}
-
-const handleClose = () => {
-  emit('update:visible', false)
+const handleClose = async () => {
+  localVisible.value = false
+  await nextTick()
   formRef.value?.resetFields()
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
-
-  const valid = await formRef.value.validate()
-  if (!valid) return
+  try {
+    await formRef.value.validate()
+  } catch {
+    return
+  }
 
   loading.value = true
   try {
-    // 处理父分类ID
     const submitData = {
-      ...props.formData,
-      parent_id: props.parentCategory.id || props.formData.parent_id || null
+      ...toRaw(localForm),
+      parent_id: props.parentCategory.id || localForm.parent_id || null
     }
-
     if (props.isEdit) {
       await updateAssetCategory(props.formData.id, submitData)
       ElMessage.success('更新成功')
@@ -151,7 +137,7 @@ const handleSubmit = async () => {
       ElMessage.success('创建成功')
     }
     emit('success')
-    handleClose()
+    localVisible.value = false
   } catch (error) {
     ElMessage.error(props.isEdit ? '更新失败' : '创建失败')
     console.error('操作失败:', error)
@@ -160,16 +146,11 @@ const handleSubmit = async () => {
   }
 }
 
-// 监听 visible 变化，重置表单
+// clear validation when opened
 watch(
-  () => props.visible,
-  (newVal) => {
-    if (newVal && formRef.value) {
-      // 下次 DOM 更新后重置表单验证
-      setTimeout(() => {
-        formRef.value?.clearValidate()
-      }, 0)
-    }
+  () => localVisible.value,
+  (val) => {
+    if (val) setTimeout(() => formRef.value?.clearValidate(), 0)
   }
 )
 </script>

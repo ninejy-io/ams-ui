@@ -133,4 +133,33 @@ const handleCommand = async (command) => {
 .el-menu-vertical {
   border-right: none;
 }
+
+/* use :deep(...) instead of ::v-deep */
+/* ensure icons visible in both expanded and collapsed menu states */
+:deep(.el-menu-vertical .el-icon),
+:deep(.el-menu-vertical .el-menu-item > .el-icon),
+:deep(.el-menu-vertical .el-submenu__title > .el-icon) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+  color: #bfcbd9 !important;
+  width: 18px;
+  margin-right: 8px;
+}
+
+/* when menu is collapsed, center icon and remove right margin */
+:deep(.el-menu--collapse .el-menu-item > .el-icon),
+:deep(.el-menu--collapse .el-submenu__title > .el-icon),
+:deep(.el-menu--collapse .el-menu-vertical .el-icon) {
+  margin-right: 0 !important;
+  width: 24px;
+  justify-content: center !important;
+}
+
+/* ensure submenu title icon stays visible */
+:deep(.el-submenu__title .el-icon) {
+  display: inline-flex !important;
+  opacity: 1 !important;
+}
 </style>

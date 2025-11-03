@@ -119,14 +119,12 @@ import {
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const isTreeView = ref(true) // 默认树形视图
+const isTreeView = ref(true)
 const currentCategory = ref({})
 const parentCategory = ref({})
 const categoryTree = ref([])
 
-const searchForm = reactive({
-  name: ''
-})
+const searchForm = reactive({ name: '' })
 
 const pagination = reactive({
   current: 1,
@@ -143,7 +141,8 @@ const fetchCategories = async () => {
     let response
     if (isTreeView.value) {
       response = await getAssetCategoryTree()
-      tableData.value = response.data
+      // guard against null/undefined
+      tableData.value = Array.isArray(response?.data) ? response.data : []
     } else {
       const params = {
         page: pagination.current,
@@ -151,12 +150,14 @@ const fetchCategories = async () => {
         ...searchForm
       }
       response = await getAssetCategories(params)
-      tableData.value = response.data.list
-      pagination.total = response.data.total
+      tableData.value = Array.isArray(response?.data?.items) ? response.data.items : []
+      pagination.total = Number(response?.data?.total) || 0
     }
   } catch (error) {
     ElMessage.error('获取资产分类列表失败')
     console.error('获取资产分类列表失败:', error)
+    tableData.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
@@ -269,16 +270,17 @@ const handleCollapseAll = () => {
 const fetchCategoryTree = async () => {
   try {
     const response = await getAssetCategoryTree()
-    categoryTree.value = response.data
+    categoryTree.value = Array.isArray(response?.data) ? response.data : []
   } catch (error) {
     console.error('获取分类树失败:', error)
+    categoryTree.value = []
   }
 }
 
 // 生命周期
 onMounted(() => {
-  fetchCategories()
-  fetchCategoryTree()
+  // load tree first (optional), ensure safe defaults before rendering
+  fetchCategoryTree().finally(() => fetchCategories())
 })
 </script>
 
