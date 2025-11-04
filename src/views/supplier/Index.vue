@@ -233,7 +233,7 @@ onMounted(() => {
 }
 
 .search-container {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .pagination-container {

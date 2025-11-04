@@ -41,7 +41,7 @@
           <span>供应商管理</span>
         </el-menu-item>
 
-        <el-menu-item index="/approval">
+        <el-menu-item index="/approval/records">
           <el-icon><DocumentChecked /></el-icon>
           <span>审批管理</span>
         </el-menu-item>
@@ -51,17 +51,21 @@
             <el-icon><Setting /></el-icon>
             <span>系统管理</span>
           </template>
-          <el-menu-item index="/users">
+          <el-menu-item index="/system/users">
             <el-icon><User /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
-          <el-menu-item index="/roles">
+          <el-menu-item index="/system/roles">
             <el-icon><UserFilled /></el-icon>
             <span>角色管理</span>
           </el-menu-item>
-          <el-menu-item index="/departments">
+          <el-menu-item index="/system/departments">
             <el-icon><Menu /></el-icon>
             <span>部门管理</span>
+          </el-menu-item>
+          <el-menu-item index="/system/approval-processes">
+            <el-icon><FolderChecked /></el-icon>
+            <span>审批流程</span>
           </el-menu-item>
         </el-sub-menu>
 

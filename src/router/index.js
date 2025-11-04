@@ -33,24 +33,12 @@ const routes = [
         component: () => import('@/views/asset/Index.vue'),
         meta: { title: '资产管理', icon: 'Box', requiresAuth: true }
       },
-      // {
-      //   path: 'assets/create',
-      //   name: 'AssetCreate',
-      //   component: () => import('@/views/asset/Create.vue'),
-      //   meta: { title: '新增资产', hidden: true }
-      // },
-      // {
-      //   path: 'assets/edit/:id',
-      //   name: 'AssetEdit',
-      //   component: () => import('@/views/asset/Edit.vue'),
-      //   meta: { title: '编辑资产', hidden: true }
-      // },
-      // {
-      //   path: 'assets/detail/:id',
-      //   name: 'AssetDetail',
-      //   component: () => import('@/views/asset/Detail.vue'),
-      //   meta: { title: '资产详情', hidden: true }
-      // },
+      {
+        path: 'maintenance',
+        name: 'Maintenance',
+        component: () => import('@/views/asset/Maintenance.vue'),
+        meta: { title: '维修管理', icon: 'Tools' }
+      },
       {
         path: 'categories',
         name: 'Categories',
@@ -63,37 +51,36 @@ const routes = [
         component: () => import('@/views/supplier/Index.vue'),
         meta: { title: '供应商管理', icon: 'Truck', requiresAuth: true }
       },
-
       {
-        path: 'users',
-        name: 'Users',
+        path: 'approval/records',
+        name: 'ApprovalRecords',
+        component: () => import('@/views/approval/Record.vue'),
+        meta: { title: '审批管理', icon: 'DocumentChecked', requiresAuth: true }
+      },
+      {
+        path: 'system/users',
+        name: 'SystemUsers',
         component: () => import('@/views/system/user/Index.vue'),
         meta: { title: '用户管理', icon: 'User', requiresAuth: true }
       },
       {
-        path: 'roles',
-        name: 'Roles',
+        path: 'system/roles',
+        name: 'SystemRoles',
         component: () => import('@/views/system/role/Index.vue'),
         meta: { title: '角色管理', icon: 'Lock', requiresAuth: true }
       },
       {
-        path: 'departments',
-        name: 'Departments',
+        path: '/system/departments',
+        name: 'SystemDepartments',
         component: () => import('@/views/system/department/Index.vue'),
         meta: { title: '部门管理', icon: 'Organization', requiresAuth: true }
       },
-      // {
-      //   path: 'maintenance',
-      //   name: 'Maintenance',
-      //   component: () => import('@/views/asset/Maintenance.vue'),
-      //   meta: { title: '维修管理', icon: 'Tools' }
-      // },
-      // {
-      //   path: 'approval',
-      //   name: 'Approval',
-      //   component: () => import('@/views/system/Approval.vue'),
-      //   meta: { title: '审批管理', icon: 'DocumentChecked' }
-      // },
+      {
+        path: 'system/approval-processes',
+        name: 'SystemApprovalProcesses',
+        component: () => import('@/views/system/approval/Process.vue'),
+        meta: { title: '审批管理', icon: 'FolderChecked', requiresAuth: true }
+      },
       {
         path: 'profile',
         name: 'Profile',

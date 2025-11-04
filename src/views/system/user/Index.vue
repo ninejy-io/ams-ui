@@ -603,7 +603,7 @@ onMounted(() => {
 
 <style scoped>
 .filter-container {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .operation-container {
   margin-bottom: 20px;
