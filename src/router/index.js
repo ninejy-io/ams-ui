@@ -34,10 +34,28 @@ const routes = [
         meta: { title: '资产管理', icon: 'Box', requiresAuth: true }
       },
       {
-        path: 'maintenance',
-        name: 'Maintenance',
-        component: () => import('@/views/asset/Maintenance.vue'),
-        meta: { title: '维修管理', icon: 'Tools' }
+        path: '/scan',
+        name: 'ScanRecord',
+        component: () => import('@/views/scan/ScanRecord.vue'),
+        meta: { title: '网络扫描', requiresAuth: true }
+      },
+      {
+        path: '/asset-requests',
+        name: 'AssetRequests',
+        component: () => import('@/views/asset-request/AssetRequestList.vue'),
+        meta: { title: '资产申请', icon: 'Document', requiresAuth: true }
+      },
+      {
+        path: '/asset-requests/my',
+        name: 'MyAssetRequests',
+        component: () => import('@/views/asset-request/MyAssetRequestList.vue'),
+        meta: { title: '我的申请', icon: 'DocumentCopy', requiresAuth: true }
+      },
+      {
+        path: '/approvals',
+        name: 'Approvals',
+        component: () => import('@/views/approval/PendingApprovalList.vue'),
+        meta: { title: '待我审批', icon: 'CircleCheck', requiresAuth: true }
       },
       {
         path: 'categories',
@@ -50,12 +68,6 @@ const routes = [
         name: 'Suppliers',
         component: () => import('@/views/supplier/Index.vue'),
         meta: { title: '供应商管理', icon: 'Truck', requiresAuth: true }
-      },
-      {
-        path: 'approval/records',
-        name: 'ApprovalRecords',
-        component: () => import('@/views/approval/Record.vue'),
-        meta: { title: '审批管理', icon: 'DocumentChecked', requiresAuth: true }
       },
       {
         path: 'system/users',
@@ -74,12 +86,6 @@ const routes = [
         name: 'SystemDepartments',
         component: () => import('@/views/system/department/Index.vue'),
         meta: { title: '部门管理', icon: 'Organization', requiresAuth: true }
-      },
-      {
-        path: 'system/approval-processes',
-        name: 'SystemApprovalProcesses',
-        component: () => import('@/views/system/approval/Process.vue'),
-        meta: { title: '审批管理', icon: 'FolderChecked', requiresAuth: true }
       },
       {
         path: 'profile',

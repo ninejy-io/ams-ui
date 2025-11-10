@@ -1,86 +1,44 @@
 import service from './index'
 
-export function getApprovalProcesses(params) {
+// 获取待我审批的申请
+export function getMyPendingApprovals() {
   return service({
-    url: '/approval-processes',
-    method: 'get',
-    params
-  })
-}
-
-export function createApprovalProcess(data) {
-  return service({
-    url: '/approval-processes',
-    method: 'post',
-    data
-  })
-}
-
-export function updateApprovalProcess(id, data) {
-  return service({
-    url: `/approval-processes/${id}`,
-    method: 'put',
-    data
-  })
-}
-
-export function deleteApprovalProcess(id) {
-  return service({
-    url: `/approval-processes/${id}`,
-    method: 'delete'
-  })
-}
-
-export function getApprovalRecords(params) {
-  return service({
-    url: '/approval-records',
-    method: 'get',
-    params
-  })
-}
-
-export function getApprovalRecordDetail(id) {
-  return service({
-    url: `/approval-records/${id}`,
+    url: '/approvals/pending',
     method: 'get'
   })
 }
 
-export function approveApprovalRecord(id, data) {
+// 批准申请
+export function approveRequest(requestId, stepId, data) {
   return service({
-    url: `/approval-records/${id}/approve`,
+    url: `/approvals/${requestId}/steps/${stepId}/approve`,
     method: 'post',
     data
   })
 }
 
-export function rejectApprovalRecord(id, data) {
+// 拒绝申请
+export function rejectRequest(requestId, stepId, data) {
   return service({
-    url: `/approval-records/${id}/reject`,
+    url: `/approvals/${requestId}/steps/${stepId}/reject`,
     method: 'post',
     data
   })
 }
 
-export function createApprovalRecord(data) {
+// 取消申请
+export function cancelRequest(requestId, data) {
   return service({
-    url: '/approval-records',
+    url: `/approvals/${requestId}/cancel`,
     method: 'post',
     data
   })
 }
 
-export function updateApprovalRecord(id, data) {
+// 获取审批历史
+export function getApprovalHistory(requestId) {
   return service({
-    url: `/approval-records/${id}`,
-    method: 'put',
-    data
-  })
-}
-
-export function deleteApprovalRecord(id) {
-  return service({
-    url: `/approval-records/${id}`,
-    method: 'delete'
+    url: `/approvals/${requestId}/history`,
+    method: 'get'
   })
 }

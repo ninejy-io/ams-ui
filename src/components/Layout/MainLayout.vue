@@ -16,6 +16,7 @@
           <el-icon><Odometer /></el-icon>
           <span>仪表盘</span>
         </el-menu-item>
+
         <el-sub-menu index="asset">
           <template #title>
             <el-icon><Box /></el-icon>
@@ -25,11 +26,30 @@
             <el-icon><Memo /></el-icon>
             <span>资产列表</span>
           </el-menu-item>
-          <el-menu-item index="/maintenance">
-            <el-icon><Tools /></el-icon>
-            <span>维修管理</span>
+          <el-menu-item index="/scan">
+            <el-icon><Search /></el-icon>
+            <span>资产扫描记录</span>
           </el-menu-item>
         </el-sub-menu>
+
+        <!-- <el-sub-menu index="asset-requests">
+          <template #title>
+            <el-icon><Search /></el-icon>
+            <span>资产申请</span>
+          </template>
+          <el-menu-item index="/approvals">
+            <el-icon><DocumentChecked /></el-icon>
+            <span>待我审批</span>
+          </el-menu-item>
+          <el-menu-item index="/asset-requests">
+            <el-icon><Document /></el-icon>
+            <span>申请列表</span>
+          </el-menu-item>
+          <el-menu-item index="/asset-requests/my">
+            <el-icon><DocumentCopy /></el-icon>
+            <span>我的申请</span>
+          </el-menu-item>
+        </el-sub-menu> -->
 
         <el-menu-item index="/categories">
           <el-icon><List /></el-icon>
@@ -39,11 +59,6 @@
         <el-menu-item index="/suppliers">
           <el-icon><Grid /></el-icon>
           <span>供应商管理</span>
-        </el-menu-item>
-
-        <el-menu-item index="/approval/records">
-          <el-icon><DocumentChecked /></el-icon>
-          <span>审批管理</span>
         </el-menu-item>
 
         <el-sub-menu index="system">
@@ -62,10 +77,6 @@
           <el-menu-item index="/system/departments">
             <el-icon><Menu /></el-icon>
             <span>部门管理</span>
-          </el-menu-item>
-          <el-menu-item index="/system/approval-processes">
-            <el-icon><FolderChecked /></el-icon>
-            <span>审批流程</span>
           </el-menu-item>
         </el-sub-menu>
 
@@ -97,6 +108,7 @@
 
 <script setup>
 import { useAuthStore } from '@/store/auth'
+import { DocumentCopy } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -140,7 +152,7 @@ const handleCommand = async (command) => {
 
 /* use :deep(...) instead of ::v-deep */
 /* ensure icons visible in both expanded and collapsed menu states */
-:deep(.el-menu-vertical .el-icon),
+/* :deep(.el-menu-vertical .el-icon),
 :deep(.el-menu-vertical .el-menu-item > .el-icon),
 :deep(.el-menu-vertical .el-submenu__title > .el-icon) {
   display: inline-flex !important;
@@ -150,20 +162,20 @@ const handleCommand = async (command) => {
   color: #bfcbd9 !important;
   width: 18px;
   margin-right: 8px;
-}
+} */
 
 /* when menu is collapsed, center icon and remove right margin */
-:deep(.el-menu--collapse .el-menu-item > .el-icon),
+/* :deep(.el-menu--collapse .el-menu-item > .el-icon),
 :deep(.el-menu--collapse .el-submenu__title > .el-icon),
 :deep(.el-menu--collapse .el-menu-vertical .el-icon) {
   margin-right: 0 !important;
   width: 24px;
   justify-content: center !important;
-}
+} */
 
 /* ensure submenu title icon stays visible */
-:deep(.el-submenu__title .el-icon) {
+/* :deep(.el-submenu__title .el-icon) {
   display: inline-flex !important;
   opacity: 1 !important;
-}
+} */
 </style>

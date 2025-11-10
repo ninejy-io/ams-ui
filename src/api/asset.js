@@ -1,6 +1,7 @@
 import service from './index'
 
-export function getAssetList(params) {
+// 资产管理
+export function getAssets(params) {
   return service({
     url: '/assets',
     method: 'get',
@@ -38,35 +39,43 @@ export function deleteAsset(id) {
   })
 }
 
-export function borrowAsset(data) {
+export function changeAssetStatus(id, status) {
   return service({
-    url: '/assets/borrow',
+    url: `/assets/${id}/status`,
+    method: 'put',
+    params: { status }
+  })
+}
+
+export function assignAsset(id, userId) {
+  return service({
+    url: `/assets/${id}/assign`,
+    method: 'put',
+    params: { user_id: userId }
+  })
+}
+
+// 服务器发现
+export function discoverCloudAssets(data) {
+  return service({
+    url: '/assets/server-discovery/cloud',
     method: 'post',
     data
   })
 }
 
-export function returnAsset(data) {
+export function scanInternalNetwork(data) {
   return service({
-    url: '/assets/return',
+    url: '/assets/server-discovery/internal',
     method: 'post',
     data
   })
 }
 
-export function transferAsset(data) {
+export function getDiscoveredAssets() {
   return service({
-    url: '/assets/transfer',
-    method: 'post',
-    data
-  })
-}
-
-export function scrapAsset(data) {
-  return service({
-    url: '/assets/scrap',
-    method: 'post',
-    data
+    url: '/assets/server-discovery/discovered',
+    method: 'get'
   })
 }
 
@@ -77,41 +86,10 @@ export function getAssetStatistics() {
   })
 }
 
-export function getExpiringWarrantyAssets(params) {
+export function getExpiringWarrantyAssets() {
   return service({
     url: '/assets/expiring-warranty',
-    method: 'get',
-    params
-  })
-}
-
-export function batchImportAssets(data) {
-  return service({
-    url: '/assets/import',
-    method: 'post',
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    },
-    data
-  })
-}
-
-export function generateQRCode(id) {
-  return service({
-    url: `/assets/${id}/qrcode`,
-    method: 'post'
-  })
-}
-
-// category
-
-
-// department
-export function getDepartments(params) {
-    return service({
-    url: '/departments',
-    method: 'get',
-    params
+    method: 'get'
   })
 }
 

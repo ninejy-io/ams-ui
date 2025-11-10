@@ -1,434 +1,277 @@
 <template>
   <div class="asset-list">
-    <div class="filter-container">
-      <el-form :model="listQuery" inline>
-        <el-form-item label="资产编号">
-          <el-input
-            v-model="listQuery.asset_number"
-            placeholder="资产编号"
-            clearable
-          />
+    <el-card>
+      <template #header>
+        <div class="card-header">
+          <span>资产管理</span>
+          <div>
+            <el-button type="primary" @click="handleCreate">
+              <el-icon><Plus /></el-icon>
+              新增资产
+            </el-button>
+            <el-button @click="handleServerDiscovery">
+              <el-icon><Search /></el-icon>
+              服务器发现
+            </el-button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 搜索表单 -->
+      <el-form :model="searchForm" inline class="search-form">
+        <el-form-item label="类型">
+          <el-select v-model="searchForm.asset_type" placeholder="全部" clearable class="input-160">
+            <el-option label="服务器" value="server" />
+            <el-option label="办公资产" value="office" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="资产名称">
-          <el-input
-            v-model="listQuery.name"
-            placeholder="资产名称"
-            clearable
-          />
-        </el-form-item>
+
         <el-form-item label="状态">
-          <el-select v-model="listQuery.status" placeholder="状态" clearable>
-            <el-option label="库存" value="in_stock" />
+          <el-select v-model="searchForm.status" placeholder="全部" clearable class="input-160">
+            <el-option label="在库" value="in_stock" />
             <el-option label="在用" value="in_use" />
             <el-option label="维修中" value="maintenance" />
-            <el-option label="报废" value="scrapped" />
+            <el-option label="已报废" value="scrapped" />
           </el-select>
         </el-form-item>
+
         <el-form-item>
-          <el-button type="primary" @click="getList">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
+          <el-input
+            v-model="searchForm.keyword"
+            placeholder="编号 / 名称 / 规格"
+            clearable
+            class="input-300"
+            @keyup.enter.native="onSearch"
+          />
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="onSearch">查询</el-button>
+          <el-button @click="onReset">重置</el-button>
         </el-form-item>
       </el-form>
-    </div>
 
-    <div class="operation-container">
-      <el-button type="primary" @click="handleCreate">
-        <el-icon><Plus /></el-icon>
-        新增资产
-      </el-button>
-      <el-button @click="openImportDialog">
-        <el-icon><Upload /></el-icon>
-        批量导入
-      </el-button>
-    </div>
+      <el-table
+        :data="assetStore.assets"
+        v-loading="assetStore.loading"
+        style="width: 100%"
+      >
+        <el-table-column prop="asset_number" label="资产编号" width="200" />
+        <el-table-column prop="asset_name" label="资产名称" min-width="150" />
+        <el-table-column prop="asset_type" label="资产类型" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.asset_type === 'server' ? 'primary' : 'success'">
+              {{ row.asset_type === 'server' ? '服务器' : '办公资产' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)">
+              {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="240" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click="handleView(row)">查看</el-button>
+            <el-button size="small" type="primary" @click="handleEdit(row)">
+              编辑
+            </el-button>
+            <el-button size="small" type="danger" @click="handleDelete(row)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
 
-    <el-table
-      v-loading="listLoading"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column label="资产编号" prop="asset_number" width="180" />
-      <el-table-column label="资产名称" prop="name" />
-      <el-table-column label="型号" prop="model" />
-      <el-table-column label="分类" prop="category.name" />
-      <el-table-column label="部门" prop="department.name" />
-      <el-table-column label="责任人" prop="responsible_person" />
-      <el-table-column label="状态" prop="status" width="100">
-        <template #default="{ row }">
-          <el-tag :type="statusTypeMap[row.status]">
-            {{ statusMap[row.status] }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="260" fixed="right">
-        <template #default="{ row }">
-          <el-button type="primary" size="small" @click="handleDetail(row.id)">
-            详情
-          </el-button>
-          <el-button type="warning" size="small" @click="handleEditRow(row)">
-            编辑
-          </el-button>
-          <el-button type="danger" size="small" @click="handleDelete(row.id)">
-            删除
-          </el-button>
-          <el-button size="small" @click="cloneRow(row)">复制</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="listQuery.page"
-        v-model:page-size="listQuery.page_size"
-        :total="total"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="getList"
-        @current-change="getList"
-      />
-    </div>
-
-    <!-- Create / Edit Dialog -->
-    <el-dialog
-      :title="formTitle"
-      v-model="formVisible"
-      width="680px"
-      :before-close="() => (formVisible = false)"
-    >
-      <el-form ref="formRef" :model="assetForm" :rules="formRules" label-width="120px">
-        <el-form-item label="资产编号" prop="asset_number">
-          <el-input v-model="assetForm.asset_number" placeholder="请输入资产编号" />
-        </el-form-item>
-        <el-form-item label="资产名称" prop="name">
-          <el-input v-model="assetForm.name" placeholder="请输入资产名称" />
-        </el-form-item>
-        <el-form-item label="型号" prop="model">
-          <el-input v-model="assetForm.model" placeholder="请输入型号" />
-        </el-form-item>
-        <el-form-item label="分类" prop="category_id">
-          <el-input v-model="assetForm.category_id" placeholder="分类ID（示例）" />
-        </el-form-item>
-        <el-form-item label="部门" prop="department_id">
-          <el-input v-model="assetForm.department_id" placeholder="部门ID（示例）" />
-        </el-form-item>
-        <el-form-item label="责任人" prop="responsible_person">
-          <el-input v-model="assetForm.responsible_person" placeholder="责任人姓名" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="assetForm.status" placeholder="请选择状态">
-            <el-option label="库存" value="in_stock" />
-            <el-option label="在用" value="in_use" />
-            <el-option label="维修中" value="maintenance" />
-            <el-option label="报废" value="scrapped" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input type="textarea" v-model="assetForm.remark" rows="3" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="primary" :loading="formSubmitting" @click="submitForm">
-          保存
-        </el-button>
-      </template>
-    </el-dialog>
-
-    <!-- Import Dialog -->
-    <el-dialog title="批量导入资产" v-model="importVisible" width="520px" :before-close="() => (importVisible = false)">
-      <div>
-        <el-upload
-          ref="uploadRef"
-          :action="null"
-          :auto-upload="false"
-          :show-file-list="true"
-          :before-upload="beforeUpload"
-          :on-remove="onRemove"
-        >
-          <el-button size="small" type="primary">选择文件</el-button>
-          <div style="margin-top:8px;font-size:12px;color:#999">支持 .xlsx/.xls/.csv，第一行为字段名</div>
-        </el-upload>
+      <!-- 分页 -->
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="assetStore.pagination.page"
+          v-model:page-size="assetStore.pagination.pageSize"
+          :total="assetStore.pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
       </div>
-      <template #footer>
-        <el-button @click="importVisible = false">取消</el-button>
-        <el-button type="primary" :loading="importLoading" @click="submitImport">开始导入</el-button>
-      </template>
-    </el-dialog>
+    </el-card>
+
+    <AssetFormDialog
+      v-model="formDialog.visible"
+      :mode="formDialog.mode"
+      :data="formDialog.data"
+      @success="handleFormSuccess"
+    />
+
+    <ServerDiscoveryDialog
+      v-model="discoveryDialog.visible"
+      @success="handleDiscoverySuccess"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Upload } from '@element-plus/icons-vue'
-import {
-  getAssetList,
-  deleteAsset,
-  createAsset,
-  updateAsset,
-  batchImportAssets
-} from '@/api/asset'
+import { Plus, Search } from '@element-plus/icons-vue'
+import { useAssetStore } from '@/store/asset'
+import AssetFormDialog from './AssetFormDialog.vue'
+import ServerDiscoveryDialog from './ServerDiscoveryDialog.vue'
 
-const router = useRouter()
+const assetStore = useAssetStore()
 
-const list = ref([])
-const total = ref(0)
-const listLoading = ref(false)
-
-const listQuery = reactive({
-  page: 1,
-  page_size: 10,
-  asset_number: '',
-  name: '',
-  status: ''
+const searchForm = reactive({
+  asset_type: '',
+  status: '',
+  keyword: ''
 })
 
-const statusMap = {
-  in_stock: '库存',
-  in_use: '在用',
-  maintenance: '维修中',
-  scrapped: '报废'
-}
-
-const statusTypeMap = {
-  in_stock: 'success',
-  in_use: 'primary',
-  maintenance: 'warning',
-  scrapped: 'danger'
-}
-
-const getList = async () => {
-  listLoading.value = true
-  try {
-    const response = await getAssetList(listQuery)
-    // guard response
-    list.value = Array.isArray(response?.data?.items) ? response.data.items : []
-    total.value = Number(response?.data?.total) || 0
-  } catch (error) {
-    console.error('获取资产列表失败:', error)
-    list.value = []
-    total.value = 0
-  } finally {
-    listLoading.value = false
-  }
-}
-
-const resetFilter = () => {
-  Object.assign(listQuery, {
-    page: 1,
-    page_size: 10,
-    asset_number: '',
-    name: '',
-    status: ''
-  })
-  getList()
-}
-
-// --- Create / Edit form state ---
-const formVisible = ref(false)
-const formSubmitting = ref(false)
-const isEdit = ref(false)
-const assetForm = reactive({
-  id: null,
-  asset_number: '',
-  name: '',
-  model: '',
-  category_id: null,
-  department_id: null,
-  responsible_person: '',
-  status: 'in_stock',
-  remark: ''
+const formDialog = reactive({
+  visible: false,
+  mode: 'create', // 'create' | 'edit' | 'view'
+  data: null
 })
-const formRef = ref(null)
 
-const formRules = {
-  asset_number: [{ required: true, message: '请输入资产编号', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入资产名称', trigger: 'blur' }]
+const discoveryDialog = reactive({
+  visible: false
+})
+
+const loadData = async () => {
+  // assetStore.fetchAssets 应接受 search/filter 参数并根据内部 pagination 请求
+  await assetStore.fetchAssets({ ...searchForm })
 }
 
-const formTitle = computed(() => (isEdit.value ? '编辑资产' : '新增资产'))
-
-const handleCreate = () => {
-  isEdit.value = false
-  Object.assign(assetForm, {
-    id: null,
-    asset_number: '',
-    name: '',
-    model: '',
-    category_id: null,
-    department_id: null,
-    responsible_person: '',
-    status: 'in_stock',
-    remark: ''
-  })
-  formVisible.value = true
+const onSearch = () => {
+  // reset to first page then load
+  assetStore.updatePagination({ page: 1 })
+  loadData()
 }
 
-const handleEditRow = (row) => {
-  isEdit.value = true
-  Object.assign(assetForm, {
-    id: row.id,
-    asset_number: row.asset_number || '',
-    name: row.name || '',
-    model: row.model || '',
-    category_id: row.category?.id || row.category_id || null,
-    department_id: row.department?.id || row.department_id || null,
-    responsible_person: row.responsible_person || '',
-    status: row.status || 'in_stock',
-    remark: row.remark || ''
-  })
-  formVisible.value = true
+const onReset = () => {
+  searchForm.asset_type = ''
+  searchForm.status = ''
+  searchForm.keyword = ''
+  assetStore.updatePagination({ page: 1 })
+  loadData()
 }
 
-const submitForm = async () => {
-  try {
-    await formRef.value.validate()
-  } catch {
-    return
+const getStatusType = (status) => {
+  const types = {
+    in_stock: 'success',
+    in_use: 'primary',
+    maintenance: 'warning',
+    scrapped: 'danger'
   }
+  return types[status] || 'info'
+}
 
-  formSubmitting.value = true
-  try {
-    const payload = {
-      asset_number: assetForm.asset_number,
-      name: assetForm.name,
-      model: assetForm.model,
-      category_id: assetForm.category_id,
-      department_id: assetForm.department_id,
-      responsible_person: assetForm.responsible_person,
-      status: assetForm.status,
-      remark: assetForm.remark
-    }
-
-    if (isEdit.value && assetForm.id) {
-      await updateAsset(assetForm.id, payload)
-      ElMessage.success('更新成功')
-    } else {
-      await createAsset(payload)
-      ElMessage.success('创建成功')
-    }
-    formVisible.value = false
-    getList()
-  } catch (error) {
-    console.error('submitForm error:', error)
-    ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
-  } finally {
-    formSubmitting.value = false
+const getStatusText = (status) => {
+  const texts = {
+    in_stock: '在库',
+    in_use: '使用中',
+    maintenance: '维修中',
+    scrapped: '已报废'
   }
+  return texts[status] || status
 }
 
-const handleDetail = (id) => {
-  router.push(`/assets/detail/${id}`)
+const handleCreate = async () => {
+  formDialog.mode = 'create'
+  // ensure dialog sees fresh data
+  formDialog.data = null
+  await nextTick()
+  formDialog.visible = true
 }
 
-const handleEdit = (id) => {
-  router.push(`/assets/edit/${id}`)
+// helper to open dialog with fresh copy of row data to avoid stale render
+const openFormWithData = async (mode, row) => {
+  formDialog.mode = mode
+  formDialog.data = null
+  await nextTick()
+  formDialog.data = { ...row }
+  formDialog.visible = true
 }
 
-const handleDelete = async (id) => {
+const handleEdit = (row) => {
+  console.log('Editing row:', row)
+  openFormWithData('edit', row)
+}
+
+const handleView = (row) => {
+  console.log('Viewing row:', row)
+  openFormWithData('view', row)
+}
+
+const handleDelete = async (row) => {
   try {
-    await ElMessageBox.confirm('确认删除该资产吗？', '提示', {
-      type: 'warning'
-    })
-    await deleteAsset(id)
+    await ElMessageBox.confirm(
+      `确定删除资产 "${row.asset_name || row.asset_number}" 吗？`,
+      '提示',
+      { type: 'warning' }
+    )
+    await assetStore.deleteExistingAsset(row.id)
     ElMessage.success('删除成功')
-    getList()
+    loadData()
   } catch (error) {
-    if (error === 'cancel') return
-    ElMessage.error('删除失败')
+    // ignore
   }
 }
 
-const cloneRow = (row) => {
-  isEdit.value = false
-  Object.assign(assetForm, {
-    id: null,
-    asset_number: `${row.asset_number}_copy`,
-    name: row.name,
-    model: row.model,
-    category_id: row.category?.id || row.category_id || null,
-    department_id: row.department?.id || row.department_id || null,
-    responsible_person: row.responsible_person || '',
-    status: row.status || 'in_stock',
-    remark: row.remark || ''
-  })
-  formVisible.value = true
+const handleServerDiscovery = () => {
+  discoveryDialog.visible = true
 }
 
-// --- Import logic ---
-const importVisible = ref(false)
-const importLoading = ref(false)
-const uploadRef = ref(null)
-const selectedFiles = ref([])
-
-const openImportDialog = () => {
-  selectedFiles.value = []
-  importVisible.value = true
+const handleFormSuccess = () => {
+  formDialog.visible = false
+  loadData()
 }
 
-const beforeUpload = (file) => {
-  // accept xlsx, xls, csv
-  const allowed = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv']
-  // some browsers may not provide mime; use extension fallback
-  const ext = (file.name || '').split('.').pop().toLowerCase()
-  if (!allowed.includes(file.type) && !['xlsx', 'xls', 'csv'].includes(ext)) {
-    ElMessage.error('Unsupported file type. Please upload xlsx/xls/csv')
-    return false
-  }
-  selectedFiles.value = [file]
-  return false // prevent auto upload
+const handleDiscoverySuccess = () => {
+  discoveryDialog.visible = false
+  loadData()
 }
 
-const onRemove = (file) => {
-  selectedFiles.value = selectedFiles.value.filter(f => f.uid !== file.uid && f.name !== file.name)
+const handleSizeChange = (size) => {
+  assetStore.updatePagination({ pageSize: size, page: 1 })
+  loadData()
 }
 
-const submitImport = async () => {
-  if (!selectedFiles.value.length) {
-    ElMessage.warning('Please select a file to import')
-    return
-  }
-  importLoading.value = true
-  try {
-    const formData = new FormData()
-    formData.append('file', selectedFiles.value[0])
-    // optional: other params
-    await batchImportAssets(formData)
-    ElMessage.success('Import started / completed')
-    importVisible.value = false
-    getList()
-  } catch (error) {
-    console.error('submitImport error:', error)
-    ElMessage.error('Import failed')
-  } finally {
-    importLoading.value = false
-  }
+const handlePageChange = (page) => {
+  assetStore.updatePagination({ page })
+  loadData()
 }
 
 onMounted(() => {
-  getList()
+  // ensure store pagination initialized, then load
+  loadData()
+  assetStore.fetchCategories()
 })
 </script>
 
 <style scoped>
-.filter-container {
-  margin-bottom: 10px;
+.asset-list {
+  padding: 0;
 }
-.operation-container {
-  margin-bottom: 20px;
+
+.card-header {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
 }
-.pagination-container {
+
+/* 搜索表单样式 */
+.search-form {
+  margin: 12px 0;
+}
+.input-160 { width: 160px; }
+.input-300 { width: 300px; }
+
+.pagination {
   margin-top: 20px;
-  text-align: right;
-}
-.dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
 }
 </style>

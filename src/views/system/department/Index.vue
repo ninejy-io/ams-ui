@@ -60,7 +60,7 @@
         </el-table-column>
         <el-table-column label="负责人" width="120">
           <template #default="scope">
-            {{ getManagerName(scope.row.manager_id) || '-' }}
+            {{ getLeaderName(scope.row.leader_id) || '-' }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right" align="center">
@@ -155,15 +155,15 @@
           />
         </el-form-item>
 
-        <el-form-item label="负责人" prop="manager_id">
+        <el-form-item label="负责人" prop="leader_id">
           <el-select
-            v-model="localForm.manager_id"
+            v-model="localForm.leader_id"
             placeholder="请选择负责人"
             clearable
             style="width: 100%"
           >
             <el-option
-              v-for="user in managerList"
+              v-for="user in leaderList"
               :key="user.value"
               :label="user.label"
               :value="user.value"
@@ -252,7 +252,7 @@ const formRules = reactive({
     { required: true, message: '请输入部门编码', trigger: 'blur' },
     { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
   ],
-  manager_id: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+  leader_id: [{ required: true, message: '请选择负责人', trigger: 'change' }],
   description: [{ max: 500, message: '长度不能超过 500 个字符', trigger: 'blur' }]
 })
 
@@ -263,8 +263,8 @@ const dialogTitle = computed(() => {
   return isEdit.value ? '编辑部门' : '新增部门'
 })
 
-// manager list for select
-const managerList = computed(() => {
+// leader list for select
+const leaderList = computed(() => {
   if (!isUsersLoaded.value || userLoadError.value) {
     return []
   }
@@ -285,6 +285,7 @@ const fetchDepartments = async () => {
     if (isTreeView.value) {
       response = await getDepartmentTree()
       // protect against null response.data
+      // console.log('fetchDepartments (tree) response:', response) // debug log
       tableData.value = Array.isArray(response?.data) ? response.data : []
     } else {
       const params = {
@@ -293,7 +294,8 @@ const fetchDepartments = async () => {
         ...searchForm
       }
       response = await getDepartments(params)
-      tableData.value = Array.isArray(response?.data?.list) ? response.data.list : []
+      // console.log('fetchDepartments (list) response:', response) // debug log
+      tableData.value = Array.isArray(response?.data?.items) ? response.data.items : []
       pagination.total = Number(response?.data?.total) || 0
     }
   } catch (error) {
@@ -309,7 +311,7 @@ const fetchDepartments = async () => {
 // 获取用户列表
 const fetchUsers = async () => {
   try {
-    const response = await getUsers({ page: 1, size: 1000 })
+    const response = await getUsers({ page: 1, size: 100 })
     // console.log('fetchUsers response:', response) // debug log
     if (response?.data?.items && Array.isArray(response.data.items)) {
       userList.value = response.data.items
@@ -343,9 +345,11 @@ const getParentName = (parentId) => {
   return findParent(tableData.value) || '-'
 }
 
-const getManagerName = (managerId) => {
-  const manager = userList.value.find(user => user.id === managerId)
-  return manager ? manager.name : ''
+const getLeaderName = (leaderId) => {
+  // console.log('getLeaderName called with leaderId:', leaderId) // debug log
+  // console.log('Current userList:', userList.value) // debug log
+  const leader = userList.value.find(user => user.id === leaderId)
+  return leader ? leader.username : ''
 }
 
 const handleSearch = () => {

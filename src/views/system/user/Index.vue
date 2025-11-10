@@ -280,7 +280,7 @@ import {
   resetPassword,
   getRoles 
 } from '@/api/user'
-import { getDepartments } from '@/api/asset'
+import { getDepartments } from '@/api/department'
 
 const list = ref([])
 const total = ref(0)
