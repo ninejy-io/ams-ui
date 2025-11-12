@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 // 获取资产分类列表
 export function getAssetCategories(params) {

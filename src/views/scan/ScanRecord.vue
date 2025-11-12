@@ -172,7 +172,6 @@ const loadData = async () => {
 const loadStats = async () => {
   try {
     const response = await getScanStats()
-    console.log('loadStats -- response', response)
     stats.value = response.data
   } catch (error) {
     console.error('获取统计失败', error)

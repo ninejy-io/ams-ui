@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 // 获取部门列表
 export function getDepartments(params) {

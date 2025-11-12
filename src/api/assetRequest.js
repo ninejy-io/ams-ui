@@ -1,4 +1,4 @@
-import service from "./index";
+import service from "./request";
 
 // 资产领用
 export function getAssetRequests(params) {

@@ -34,6 +34,12 @@ const routes = [
         meta: { title: '资产管理', icon: 'Box', requiresAuth: true }
       },
       {
+        path: '/cloud-discovery',
+        name: 'CloudDiscoveryRecords',
+        component: () => import('@/views/cloud-discovery/CloudDiscoveryRecords.vue'),
+        meta: { title: '云发现记录', icon: 'Cloudy', requiresAuth: true }
+      },
+      {
         path: '/scan',
         name: 'ScanRecord',
         component: () => import('@/views/scan/ScanRecord.vue'),

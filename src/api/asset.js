@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 // 资产管理
 export function getAssets(params) {
@@ -52,23 +52,6 @@ export function assignAsset(id, userId) {
     url: `/assets/${id}/assign`,
     method: 'put',
     params: { user_id: userId }
-  })
-}
-
-// 服务器发现
-export function discoverCloudAssets(data) {
-  return service({
-    url: '/assets/server-discovery/cloud',
-    method: 'post',
-    data
-  })
-}
-
-export function scanInternalNetwork(data) {
-  return service({
-    url: '/assets/server-discovery/internal',
-    method: 'post',
-    data
   })
 }
 

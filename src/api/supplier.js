@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 // 获取供应商列表
 export function getSuppliers(params) {

@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 // 获取待我审批的申请
 export function getMyPendingApprovals() {

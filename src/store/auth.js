@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await login(loginData)
       token.value = response.data.token
-      user.value = response.data.user
+      user.value = response.data.user.username
       setToken(response.data.token)
       return response
     } catch (error) {

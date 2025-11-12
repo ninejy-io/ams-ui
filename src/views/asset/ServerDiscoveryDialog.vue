@@ -90,7 +90,8 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { discoverCloudAssets, scanInternalNetwork } from '@/api/asset'
+import { discoverCloudAssets } from '@/api/cloudDiscovery'
+import { startScan } from '@/api/scan'
 
 const props = defineProps({
   modelValue: Boolean
@@ -108,14 +109,14 @@ const loading = ref(false)
 const discoveryResult = ref(null)
 
 const cloudForm = reactive({
-  cloud_provider: 'aliyun',
+  cloud_provider: 'aws',
   access_key: '',
   secret_key: '',
-  region: 'cn-beijing'
+  region: 'us-east-1'
 })
 
 const internalForm = reactive({
-  network_cidr: '192.168.1.0/24',
+  subnet: '192.168.1.0/24',
   ports: '22,80,443,3306'
 })
 
@@ -132,7 +133,7 @@ const handleCloudDiscovery = async () => {
   try {
     const response = await discoverCloudAssets(cloudForm)
     discoveryResult.value = response.data
-    ElMessage.success('云资产发现完成')
+    ElMessage.success('云资产发现开始')
     emit('success')
   } catch (error) {
     ElMessage.error(error.message || '发现失败')
@@ -145,7 +146,7 @@ const handleCloudDiscovery = async () => {
 const handleInternalScan = async () => {
   loading.value = true
   try {
-    await scanInternalNetwork(internalForm)
+    await startScan(internalForm)
     ElMessage.success('内网扫描任务已开始，请稍后查看结果')
     emit('success')
   } catch (error) {

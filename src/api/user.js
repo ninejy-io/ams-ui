@@ -1,4 +1,4 @@
-import service from './index'
+import service from './request'
 
 export function getUsers(params) {
   return service({

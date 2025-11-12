@@ -26,6 +26,10 @@
             <el-icon><Memo /></el-icon>
             <span>资产列表</span>
           </el-menu-item>
+          <el-menu-item index="/cloud-discovery">
+            <el-icon><Cloudy /></el-icon>
+            <span>云发现记录</span>
+          </el-menu-item>
           <el-menu-item index="/scan">
             <el-icon><Search /></el-icon>
             <span>资产扫描记录</span>
