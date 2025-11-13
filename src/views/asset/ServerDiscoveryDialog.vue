@@ -41,7 +41,7 @@
       <el-tab-pane label="内网扫描" name="internal">
         <el-form :model="internalForm" label-width="100px">
           <el-form-item label="网络段" prop="network_cidr">
-            <el-input v-model="internalForm.network_cidr" placeholder="如: 192.168.1.0/24" />
+            <el-input v-model="internalForm.subnet" placeholder="如: 192.168.1.0/24" />
           </el-form-item>
           
           <el-form-item label="端口范围">
@@ -117,7 +117,7 @@ const cloudForm = reactive({
 
 const internalForm = reactive({
   subnet: '192.168.1.0/24',
-  ports: '22,80,443,3306'
+  ports: '22'
 })
 
 const cloudRules = {
