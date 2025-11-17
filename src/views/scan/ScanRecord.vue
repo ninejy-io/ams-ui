@@ -80,6 +80,7 @@
             <el-button link type="primary" @click="showDetail(row)">
               详情
             </el-button>
+            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -126,7 +127,7 @@ import { ref, reactive, onMounted, compile } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import ScanDetail from './ScanDetail.vue'
-import { getScanRecords, startScan, getScanStats } from '@/api/scan'
+import { getScanRecords, startScan, getScanStats, deleteScanRecord } from '@/api/scan'
 
 const loading = ref(false)
 const scanLoading = ref(false)
@@ -202,6 +203,29 @@ const NewStartScan = async () => {
 const showDetail = (row) => {
   currentRecordId.value = row.id
   showDetailDialog.value = true
+}
+
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除扫描记录 "${row.id}" 吗？`,
+      '删除确认',
+      {
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }
+    )
+    
+    await deleteScanRecord(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+      console.error('删除扫描记录失败:', error)
+    }
+  }
 }
 
 const resetQuery = () => {

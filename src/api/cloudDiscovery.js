@@ -25,3 +25,11 @@ export function getDiscoveryRecordDetail(id) {
     method: 'get'
   })
 }
+
+// 删除云发现记录
+export function deleteDsicoveryRecord(id) {
+  return service({
+    url: `/assets/server-discovery/records/${id}`,
+    method: 'delete'
+  })
+}

@@ -29,3 +29,10 @@ export function getScanStats() {
     method: 'get'
   })
 }
+
+export function deleteScanRecord(id) {
+  return service({
+    url: `/scan/records/${id}`,
+    method: 'delete'
+  })
+}

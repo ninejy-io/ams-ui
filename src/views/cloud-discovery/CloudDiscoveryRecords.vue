@@ -97,6 +97,7 @@
             >
               停止
             </el-button>
+            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -161,7 +162,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import RecordDetail from './RecordDetail.vue'
-import { getDiscoveryRecords, discoverCloudAssets } from '@/api/cloudDiscovery'
+import { getDiscoveryRecords, discoverCloudAssets, deleteDsicoveryRecord } from '@/api/cloudDiscovery'
 
 const loading = ref(false)
 const discoverLoading = ref(false)
@@ -241,6 +242,29 @@ const stopDiscovery = async (row) => {
     // 这里可以调用停止发现的API
   } catch (error) {
     // 用户取消
+  }
+}
+
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除云发现记录 "${row.id}" 吗？`,
+      '删除确认',
+      {
+        type: 'warning',
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }
+    )
+    
+    await deleteDsicoveryRecord(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+      console.error('删除云发现记录失败:', error)
+    }
   }
 }
 
