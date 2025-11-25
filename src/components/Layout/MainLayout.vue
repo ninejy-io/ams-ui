@@ -36,6 +36,25 @@
           </el-menu-item>
         </el-sub-menu>
 
+        <el-sub-menu index="asset/lend">
+          <template #title>
+            <el-icon><Box /></el-icon>
+            <span>资产借出管理</span>
+          </template>
+          <el-menu-item index="/asset/lend-record">
+            <el-icon><el-icon-document /></el-icon>
+            <span>借出记录</span>
+          </el-menu-item>
+          <el-menu-item index="/asset/lend-request">
+            <el-icon><el-icon-tickets /></el-icon>
+            <span>借出申请</span>
+          </el-menu-item>
+          <el-menu-item index="/asset/direct-lend">
+            <el-icon><el-icon-plus /></el-icon>
+            <span>直接借出</span>
+          </el-menu-item>
+        </el-sub-menu>
+
         <!-- <el-sub-menu index="asset-requests">
           <template #title>
             <el-icon><Search /></el-icon>

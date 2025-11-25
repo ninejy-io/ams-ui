@@ -63,6 +63,33 @@ const routes = [
         component: () => import('@/views/approval/PendingApprovalList.vue'),
         meta: { title: '待我审批', icon: 'CircleCheck', requiresAuth: true }
       },
+
+      {
+        path: '/asset/lend-record',
+        component: () => import('@/views/asset/lend/LendRecordList.vue'),
+        name: 'LendRecord',
+        meta: { title: '借出记录', icon: 'el-icon-document', requiresAuth: true }
+      },
+      {
+        path: '/asset/lend-request',
+        component: () => import('@/views/asset/lend/LendRequestList.vue'),
+        name: 'LendRequest',
+        meta: { title: '借出申请', icon: 'el-icon-tickets', requiresAuth: true }
+      },
+      {
+        path: '/asset/lend-request/create',
+        component: () => import('@/views/asset/lend/CreateLendRequest.vue'),
+        name: 'CreateLendRequest',
+        meta: { title: '新建申请', activeMenu: '/asset/lend-request', requiresAuth: true },
+        hidden: true
+      },
+      {
+        path: '/asset/direct-lend',
+        component: () => import('@/views/asset/lend/DirectLend.vue'),
+        name: 'DirectLend',
+        meta: { title: '直接借出', icon: 'el-icon-plus', requiresAuth: true }
+      },
+
       {
         path: 'categories',
         name: 'Categories',
