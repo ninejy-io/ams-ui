@@ -123,7 +123,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listLendRecords, returnAsset } from '@/api/asset/lend'
 import { getUsers } from '@/api/user'
-import { parseTime } from '@/utils'
+import { parseTime } from '@/utils/utils'
 
 const loading = ref(true)
 const recordList = ref([])
